@@ -36,7 +36,7 @@ public class ProductCount {
 
         public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
             String line = value.toString();
-
+            
             // match the line to get nice groups out of it
             Matcher matcher = pattern.matcher(line);
 
@@ -46,11 +46,12 @@ public class ProductCount {
                 // split at spaces and get the second fragment
                 String product_url = request.split("\\s")[1];
 
-
                 product.set(product_url);
                 context.write(product, one);
+            } else {
+                product.set("ERROR");
+                context.write(product, one);
             }
-
         }
 
     }
