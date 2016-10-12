@@ -1,0 +1,23 @@
+apache web server logs
+- text
+- user behaviour
+
+PostgreSQL
+- sales data
+
+Based on the data answer to the following questions:
+- What are the top-10 best selling products in terms of total sales?
+- What are the top-10 browsed products?
+- What anomaly is there between these two?
+- What are the most popular browsing hours?
+
+All data must be transferred to PostgreSQL
+- Transfer Apache logs (with Apache Flume) to the HDFS
+- Compute the frequencies of viewing of different products using MapReduce (Question 2)
+- Compute the viewing hour data with MapReduce (Q4)
+- Transfer the results (with Apache Sqoop) to PostgreSQL
+- Find answer to the questions in PostgreSQL using SQL (Q1-4)
+
+
+Submission:
+- an IntelliJ IDEA project will be returned
