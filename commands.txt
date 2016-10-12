@@ -15,3 +15,21 @@ jar -cvf bhours.jar -C bh_classes/ .
 hadoop jar bhours.jar fi.tut.dip.BrowsingHours access-data bh-out
 
 
+
+
+# sqoop the browsing hours into a table
+
+sqoop export --connect jdbc:postgresql://localhost/ \
+--username hduser --password hduser --table hours --export-dir /user/hduser/bh-out \
+--driver org.postgresql.Driver \
+--connection-manager org.apache.sqoop.manager.GenericJdbcManager \
+--direct --input-fields-terminated-by '\t' --lines-terminated-by '\n'
+
+
+# sqoop browsing activity
+
+sqoop export --connect jdbc:postgresql://localhost/ \
+--username hduser --password hduser --table log_data --export-dir /user/hduser/pc-out \
+--driver org.postgresql.Driver \
+--connection-manager org.apache.sqoop.manager.GenericJdbcManager \
+--direct --input-fields-terminated-by '\t' --lines-terminated-by '\n'

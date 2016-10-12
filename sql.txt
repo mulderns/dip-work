@@ -1,0 +1,15 @@
+CREATE TABLE hours (
+  hour INT primary key,
+  hits INT NOT NULL
+);
+
+
+CREATE TABLE log_data (
+  url VARCHAR(200) primary key,
+  hits INT NOT NULL
+);
+
+
+select * from hours order by hits desc;
+
+select * from log_data where url not like '%/add%' and url like '%product%' order by hits desc;
