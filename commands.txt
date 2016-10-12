@@ -1,0 +1,10 @@
+# Flume
+flume-ng agent --conf-file flume-access-log.conf --name log_agent
+
+
+
+# Compiling and using yarn
+javac -classpath `hadoop classpath` -d pc_classes ProductCount.java jar -cvf pcount.jar -C 
+pc_classes/ .
+hadoop jar pcount.jar fi.tut.dip.ProductCount access-data pc-out
+
