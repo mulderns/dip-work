@@ -15,9 +15,8 @@ What are the top-10 best selling products in terms of total sales?
 
 
 SELECT product_name, 
-    ROUND(CAST(SUM(
-      order_item_quantity * order_item_product_price
-    ) AS NUMERIC), 2) AS sales
+    ROUND(CAST(SUM(order_item_quantity * order_item_product_price) AS NUMERIC), 2) 
+      AS sales
     FROM order_items 
  INNER JOIN orders ON order_items.order_item_order_id = orders.order_id 
  INNER JOIN products ON order_items.order_item_product_id= products.product_id
@@ -29,12 +28,6 @@ SELECT product_name,
 
 
 What are the top-10 browsed products?
-
-
-  SELECT url as product_name, hits FROM log_data 
-    WHERE url NOT LIKE '%/add%' 
-    ORDER BY hits DESC 
-    LIMIT 10;
 
                  product_name                  | hits
 -----------------------------------------------+------
@@ -49,24 +42,41 @@ What are the top-10 browsed products?
  Nike Men's Free 5.0  Running Shoe             | 1004
  Under Armour Hustle Storm Medium Duffle Bag   |  939
 
+ 
+SELECT url as product_name, hits FROM log_data 
+  WHERE url NOT LIKE '%/add%' 
+  ORDER BY hits DESC 
+  LIMIT 10;
 
 
 
 What anomaly is there between these two?
 
+  These are not common between the top 10 viewed and
+  top 10 sales:
+  
+                 product_name
+-----------------------------------------------
+ Under Armour Girls' Toddler Spine Surge Runni
+ Nike Men's Free 5.0  Running Shoe
+ Nike Men's Free 5.0+ Running Shoe
+ adidas Kids' RG III Mid Football Cleat
+ Under Armour Hustle Storm Medium Duffle Bag
+ LIJA Women's Eyelet Sleeveless Golf Polo
+
+ 
 SELECT url as product_name
- INTO top_viewed FROM log_data
+  INTO top_viewed FROM log_data
   WHERE url NOT LIKE '%/add%'
   ORDER BY hits DESC
   LIMIT 10;
-
 
 SELECT product_name, 
     ROUND(CAST(SUM(
       order_item_quantity * order_item_product_price
     ) AS NUMERIC), 2) AS sales
-    INTO top_sales
-    FROM order_items 
+ INTO top_sales
+ FROM order_items 
  INNER JOIN orders ON order_items.order_item_order_id = orders.order_id 
  INNER JOIN products ON order_items.order_item_product_id= products.product_id
  WHERE order_status = 'COMPLETE'
@@ -77,15 +87,6 @@ SELECT product_name,
 SELECT product_name FROM top_sales WHERE product_name NOT IN (SELECT product_name FROM top_viewed) UNION
 SELECT product_name FROM top_viewed WHERE product_name NOT IN (SELECT product_name FROM top_sales);
 
-                 product_name
------------------------------------------------
- Under Armour Girls' Toddler Spine Surge Runni
- Nike Men's Free 5.0  Running Shoe
- Nike Men's Free 5.0+ Running Shoe
- adidas Kids' RG III Mid Football Cleat
- Under Armour Hustle Storm Medium Duffle Bag
- LIJA Women's Eyelet Sleeveless Golf Polo
-(6 rows)
 
 
 What are the most popular browsing hours?
@@ -97,12 +98,12 @@ SELECT * FROM hours
   ORDER BY hits DESC 
   LIMIT 5;
 
-   hour | hits 
-  ------+------
-     21 | 31307
-     20 | 30225
-     22 | 29288
-     23 | 21371
-     19 | 19995
+ hour | hits 
+------+------
+   21 | 31307
+   20 | 30225
+   22 | 29288
+   23 | 21371
+   19 | 19995
 
 
