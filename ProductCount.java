@@ -19,82 +19,90 @@ import java.nio.charset.Charset;
 
 public class ProductCount {
 
-    public static class TokenizerMapper extends Mapper<Object, Text, Text, IntWritable> {
+	public static class TokenizerMapper extends Mapper<Object, Text, Text, IntWritable> {
 
-        private static final String logEntryPattern =
-                "^([\\d.]+) (\\S+) (\\S+) \\[([\\w:/]+\\s[+\\-]\\d{4})\\] \"(.+?)\" (\\d{3}) (\\d+) \"([^\"]+)\" \"([^\"]+)\"";
-        //1         2      3         4                              5       6        7        8            9
-        //  ip      ?      ?         time                           request status   bytes    ?            agent
-        // 79.133.215.123 - - [14/Jun/2014:10:30:13 -0400] "GET /home HTTP/1.1" 200 1671 "-" "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.153 Safari/537.36"
-
-        private final static IntWritable one = new IntWritable(1);
-        private Text product = new Text();
+		private static final String logEntryPattern = 
+				"^([\\d.]+) (\\S+) (\\S+) \\[([\\w:/]+\\s[+\\-]\\d{4})\\] \"(.+?)\" (\\d{3}) (\\d+) \"([^\"]+)\" \"([^\"]+)\"";
+                //1         2      3         4                              5       6        7        8            9
+		        //  ip      ?      ?         time                           request status   bytes    ?            agent
+		     // 79.133.215.123 - - [14/Jun/2014:10:30:13 -0400] "GET /home HTTP/1.1" 200 1671 "-" "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/35.0.1916.153 Safari/537.36"
+		
+		private final static IntWritable one = new IntWritable(1);
+		private Text product = new Text();
 
 		/* Your Mapper Code here */
+		
+		private static final Pattern pattern = Pattern.compile(logEntryPattern);
+		
+		public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
+			String line = value.toString();
+			
+			// match the line to get nice groups out of it
+			Matcher matcher = pattern.matcher(line);
+			
+			if (matcher.matches()) {
+				String request = matcher.group(5);
+				// request: GET url HTTP/1.1
+				// split at spaces and get the second fragment
+				request = request.split("\\s")[1];
+				
+				// url decode
+				request = java.net.URLDecoder.decode(request, "UTF-8");
+				
+				// extract the product urls
+				int index = request.indexOf("/product/");
+				if ( index > -1 && request.length() > index + 9){
+					String product_name = request.substring(index + 9);
+					product.set(product_name);
+					context.write(product, one);
+				} 
+				
 
-        private static final Pattern pattern = Pattern.compile(logEntryPattern);
+			}
+			
+		}
 
-        public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
-            String line = value.toString();
-            
-            // match the line to get nice groups out of it
-            Matcher matcher = pattern.matcher(line);
+	}
 
-            if (matcher.matches()) {
-                String request = matcher.group(5);
-                // request: GET url HTTP/1.1
-                // split at spaces and get the second fragment
-                String product_url = request.split("\\s")[1];
+	public static class IntSumReducer extends Reducer<Text, IntWritable, Text, IntWritable> {
+		private IntWritable result = new IntWritable();
 
-                product.set(product_url);
-                context.write(product, one);
-            } else {
-                product.set("ERROR");
-                context.write(product, one);
-            }
-        }
+		/* Your Reducer Code here */
+		public void reduce(Text key, Iterable<IntWritable> values, Context context)
+				throws IOException, InterruptedException {
+			int sum = 0;
+			for (IntWritable val : values) {
+				sum += val.get();
+			}
+			result.set(sum);
+			context.write(key, result);
+		}
+	}
 
-    }
+	public static void main(String[] args) throws Exception {
 
-    public static class IntSumReducer extends Reducer<Text, IntWritable, Text, IntWritable> {
-        private IntWritable result = new IntWritable();
+		Configuration conf = new Configuration();
+		String[] otherArgs = new GenericOptionsParser(conf, args).getRemainingArgs();
 
-        /* Your Reducer Code here */
-        public void reduce(Text key, Iterable<IntWritable> values, Context context)
-                throws IOException, InterruptedException {
-            int sum = 0;
-            for (IntWritable val : values) {
-                sum += val.get();
-            }
-            result.set(sum);
-            context.write(key, result);
-        }
-    }
+		if (otherArgs.length < 2) {
+			System.err.println("Usage: productcount <in> [<in>...] <out>");
+			System.exit(2);
+		}
 
-    public static void main(String[] args) throws Exception {
+		Job job = Job.getInstance(conf, "Product Count");
 
-        Configuration conf = new Configuration();
-        String[] otherArgs = new GenericOptionsParser(conf, args).getRemainingArgs();
+		job.setJarByClass(ProductCount.class);
+		job.setMapperClass(TokenizerMapper.class);
+		job.setReducerClass(IntSumReducer.class);
+		job.setOutputKeyClass(Text.class);
+		job.setOutputValueClass(IntWritable.class);
 
-        if (otherArgs.length < 2) {
-            System.err.println("Usage: productcount <in> [<in>...] <out>");
-            System.exit(2);
-        }
+		for (int i = 0; i < otherArgs.length - 1; ++i) {
+			TextInputFormat.addInputPath(job, new Path(otherArgs[i]));
+		}
 
-        Job job = Job.getInstance(conf, "Product Count");
+		FileOutputFormat.setOutputPath(job, new Path(otherArgs[otherArgs.length - 1]));
 
-        job.setJarByClass(ProductCount.class);
-        job.setMapperClass(TokenizerMapper.class);
-        job.setReducerClass(IntSumReducer.class);
-        job.setOutputKeyClass(Text.class);
-        job.setOutputValueClass(IntWritable.class);
-
-        for (int i = 0; i < otherArgs.length - 1; ++i) {
-            TextInputFormat.addInputPath(job, new Path(otherArgs[i]));
-        }
-
-        FileOutputFormat.setOutputPath(job, new Path(otherArgs[otherArgs.length - 1]));
-
-        System.exit(job.waitForCompletion(true) ? 0 : 1);
-    }
+		System.exit(job.waitForCompletion(true) ? 0 : 1);
+	}
 }
