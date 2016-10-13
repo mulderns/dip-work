@@ -1,4 +1,4 @@
-What are the top-10 best selling products in terms of total sales?
+Q1: What are the top-10 best selling products in terms of total sales?
 
                  product_name                  |   sales
 -----------------------------------------------+------------
@@ -27,7 +27,7 @@ SELECT product_name,
 
 
 
-What are the top-10 browsed products?
+Q2: What are the top-10 browsed products?
 
                  product_name                  | hits
 -----------------------------------------------+------
@@ -50,10 +50,10 @@ SELECT url as product_name, hits FROM log_data
 
 
 
-What anomaly is there between these two?
+Q3: What anomaly is there between these two?
 
-  These are not common between the top 10 viewed and
-  top 10 sales:
+These are not common between the top 10 viewed and
+top 10 sales:
   
                  product_name
 -----------------------------------------------
@@ -89,14 +89,9 @@ SELECT product_name FROM top_viewed WHERE product_name NOT IN (SELECT product_na
 
 
 
-What are the most popular browsing hours?
+Q4: What are the most popular browsing hours?
 
-  Between 20:00 - 23:00.
-
-
-SELECT * FROM hours 
-  ORDER BY hits DESC 
-  LIMIT 5;
+Between 20:00 - 23:00.
 
  hour | hits 
 ------+------
@@ -105,5 +100,11 @@ SELECT * FROM hours
    22 | 29288
    23 | 21371
    19 | 19995
+
+SELECT * FROM hours 
+  ORDER BY hits DESC 
+  LIMIT 5;
+
+
 
 
