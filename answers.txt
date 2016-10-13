@@ -1,0 +1,108 @@
+What are the top-10 best selling products in terms of total sales?
+
+                 product_name                  |   sales
+-----------------------------------------------+------------
+ Field & Stream Sportsman 16 Gun Fire Safe     | 2257887.16
+ Perfect Fitness Perfect Rip Deck              | 1461536.41
+ Diamondback Women's Serene Classic Comfort Bi | 1355009.71
+ Nike Men's Free 5.0+ Running Shoe             | 1205679.39
+ Nike Men's Dri-FIT Victory Golf Polo          | 1046600.00
+ Pelican Sunstream 100 Kayak                   |  997550.15
+ Nike Men's CJ Elite 2 TD Football Cleat       |  957896.35
+ O'Brien Men's Neoprene Life Vest              |  947970.65
+ Under Armour Girls' Toddler Spine Surge Runni |  418175.45
+ LIJA Women's Eyelet Sleeveless Golf Polo      |   22880.00
+
+
+SELECT product_name, 
+    ROUND(CAST(SUM(
+      order_item_quantity * order_item_product_price
+    ) AS NUMERIC), 2) AS sales
+    FROM order_items 
+ INNER JOIN orders ON order_items.order_item_order_id = orders.order_id 
+ INNER JOIN products ON order_items.order_item_product_id= products.product_id
+ WHERE order_status = 'COMPLETE'
+ GROUP BY product_name
+ ORDER BY sales DESC
+ LIMIT 10;
+
+
+
+What are the top-10 browsed products?
+
+
+  SELECT url as product_name, hits FROM log_data 
+    WHERE url NOT LIKE '%/add%' 
+    ORDER BY hits DESC 
+    LIMIT 10;
+
+                 product_name                  | hits
+-----------------------------------------------+------
+ Perfect Fitness Perfect Rip Deck              | 1926
+ adidas Kids' RG III Mid Football Cleat        | 1793
+ Nike Men's Dri-FIT Victory Golf Polo          | 1780
+ Nike Men's CJ Elite 2 TD Football Cleat       | 1757
+ Pelican Sunstream 100 Kayak                   | 1104
+ O'Brien Men's Neoprene Life Vest              | 1084
+ Diamondback Women's Serene Classic Comfort Bi | 1059
+ Field & Stream Sportsman 16 Gun Fire Safe     | 1028
+ Nike Men's Free 5.0  Running Shoe             | 1004
+ Under Armour Hustle Storm Medium Duffle Bag   |  939
+
+
+
+
+What anomaly is there between these two?
+
+SELECT url as product_name
+ INTO top_viewed FROM log_data
+  WHERE url NOT LIKE '%/add%'
+  ORDER BY hits DESC
+  LIMIT 10;
+
+
+SELECT product_name, 
+    ROUND(CAST(SUM(
+      order_item_quantity * order_item_product_price
+    ) AS NUMERIC), 2) AS sales
+    INTO top_sales
+    FROM order_items 
+ INNER JOIN orders ON order_items.order_item_order_id = orders.order_id 
+ INNER JOIN products ON order_items.order_item_product_id= products.product_id
+ WHERE order_status = 'COMPLETE'
+ GROUP BY product_name
+ ORDER BY sales DESC
+ LIMIT 10;  
+
+SELECT product_name FROM top_sales WHERE product_name NOT IN (SELECT product_name FROM top_viewed) UNION
+SELECT product_name FROM top_viewed WHERE product_name NOT IN (SELECT product_name FROM top_sales);
+
+                 product_name
+-----------------------------------------------
+ Under Armour Girls' Toddler Spine Surge Runni
+ Nike Men's Free 5.0  Running Shoe
+ Nike Men's Free 5.0+ Running Shoe
+ adidas Kids' RG III Mid Football Cleat
+ Under Armour Hustle Storm Medium Duffle Bag
+ LIJA Women's Eyelet Sleeveless Golf Polo
+(6 rows)
+
+
+What are the most popular browsing hours?
+
+  Between 20:00 - 23:00.
+
+
+SELECT * FROM hours 
+  ORDER BY hits DESC 
+  LIMIT 5;
+
+   hour | hits 
+  ------+------
+     21 | 31307
+     20 | 30225
+     22 | 29288
+     23 | 21371
+     19 | 19995
+
+
