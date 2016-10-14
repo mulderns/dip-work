@@ -58,8 +58,8 @@ top 10 sales:
                  product_name
 -----------------------------------------------
  Under Armour Girls' Toddler Spine Surge Runni
- Nike Men's Free 5.0  Running Shoe
- Nike Men's Free 5.0+ Running Shoe
+ Nike Men's Free 5.0  Running Shoe              <- ignoring these
+ Nike Men's Free 5.0+ Running Shoe              <- ignoring these
  adidas Kids' RG III Mid Football Cleat
  Under Armour Hustle Storm Medium Duffle Bag
  LIJA Women's Eyelet Sleeveless Golf Polo
